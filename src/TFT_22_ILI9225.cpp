@@ -733,6 +733,19 @@ uint16_t TFT_22_ILI9225::drawText(uint16_t x, uint16_t y, STRING s, uint16_t col
     return currx;
 }
 
+void TFT_22_ILI9225::drawNumber(uint16_t x, uint16_t y, uint8_t number, uint16_t color) {
+    int digit;
+    char number_text[] = "999\0";
+    int number_index = 0;
+    for (int i = 1000; i > 1; i /= 10) {
+        digit = number % i;                    // Isolates only the relevant digit
+        digit /= i / 10;                           // Scales the digit to the ones place
+        number_text[number_index] = digit + 48; // 0 is 48 in ASCII
+        number_index++;
+    }
+    drawText(x, y, number_text, color);
+}
+
 uint16_t TFT_22_ILI9225::getTextWidth( STRING s ) {
 
     uint16_t width = 0;

@@ -348,6 +348,16 @@ class TFT_22_ILI9225 {
         /// @return   width of character in display pixels
         //uint16_t drawGFXChar(int16_t x, int16_t y, unsigned char c, uint16_t color);
 
+        // --------------------------------------------------------------------
+        // New functions for the STM32F0 port
+        // --------------------------------------------------------------------
+
+        // Draw a three digit number at the coordinates given
+        // @param     number to be printed (0-255)
+        // @param     x point coordinate, x-axis
+        // @param     y point coordinate, y-axis
+        // @param     color 16-bit color
+        void drawNumber(uint16_t x, uint16_t y, uint8_t number, uint16_t color);
 
     private:
 
