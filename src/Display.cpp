@@ -430,6 +430,7 @@ void Display::drawNameEntryMenu() {
     screen.fillTriangle(letterX, letterY + 4 + 16, letterX + 12 , letterY + 4 + 16, letterX + 6, letterY + 16 + 16, letter3_color);
 
     // Draw the confirm option
+    screen.setFont((uint8_t*) &Terminal11x16);
     char done_text[] = "Confirm\0";
     text_width = screen.getTextWidth(done_text);
     screen.drawText((screen.maxX() - text_width) / 2, 150, done_text, done_color);

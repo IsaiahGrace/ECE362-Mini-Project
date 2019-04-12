@@ -42,6 +42,13 @@ public:
     void drawNextBlock(block_t next_block);
     void endGame(uint8_t score);
 
+    // This class will call the following tetris functions:
+    // void TETRIS_Start();  // Starts the tetris game
+    // void TETRIS_Left();   // Response to press of left button
+    // void TETRIS_Right();  // Response to press of right button
+    // void TETRIS_Down();   // Response to press of down button
+    // void TETRIS_Rotate(); // Response to press of rotate button
+
     // Generic button press responses
     // These are the functions that Meghan Calls when a button is pressed (falling edge)
     void upButtonPress();
