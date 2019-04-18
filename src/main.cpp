@@ -135,7 +135,7 @@ int main(void) {
     // Draw the example from the google drive
     // Insert the L block
     board[19] = insertBlock(board[19], 0, L_BLOCK);
-    board[20] = insertBlock(board[19], 0, L_BLOCK);
+    board[20] = insertBlock(board[20], 0, L_BLOCK);
     board[21] = insertBlock(board[21], 0, L_BLOCK);
     board[21] = insertBlock(board[21], 1, L_BLOCK);
 

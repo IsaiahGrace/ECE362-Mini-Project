@@ -188,7 +188,9 @@ void TFT_22_ILI9225::begin() {
 // ----------------------------------------------------------------------------
 
 void TFT_22_ILI9225::_delay(unsigned int ms) {
-    _nano_wait(ms * 1000000);
+    for (; ms; ms--) {
+        _nano_wait(1000000);
+    }
 }
 
 void TFT_22_ILI9225::_nano_wait(unsigned int ns) {
