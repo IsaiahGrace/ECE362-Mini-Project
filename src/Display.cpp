@@ -8,6 +8,10 @@
 #include "Display.h"
 #include "gameBoard.h"
 
+// TODO: REMOVE THIS. It's only here to give a "random" number for the sore in the testing mode
+#include "stdlib.h"
+
+
 Display::Display() : screen() {
     screen.begin();
     screen.setOrientation(2); // This is portrait with the pins on the TOP
@@ -126,6 +130,9 @@ void Display::rotateButtonPress() {
         break;
     case TETRIS:
         // TODO: Call Anushka's Code Here
+
+        // This is just testing code. Generate a random score and end the tetris game
+        endGame((uint8_t) rand() & 0xFF);
         break;
     case NAME_ENTRY:
         if (menu_selection == 3)

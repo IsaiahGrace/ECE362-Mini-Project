@@ -14,6 +14,9 @@
 #include "TFT_22_ILI9225.h"
 #include "Display.h"
 
+Display* tetrisPTR;
+uint16_t buttonHistory[5];
+
 void nano_wait(unsigned int ns) {
     // Taken from Purdue ECE362 course materials
     asm(    "        mov r0,%0\n"
@@ -36,6 +39,90 @@ uint32_t insertBlock(uint32_t row, int col, block_t block) {
     bitmask = (block << (col * 3));
     row |= bitmask;
     return row;
+}
+
+void init_TIM2_buttons() {
+    // Clear the button histories
+    buttonHistory[0] = 0;
+    buttonHistory[1] = 0;
+    buttonHistory[2] = 0;
+    buttonHistory[3] = 0;
+    buttonHistory[4] = 0;
+
+    // Enable the Clock to GPIOA
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+
+    // Set PA0, PA1, PA2, PA3, PA4 to Input
+    GPIOB->MODER &= ~(GPIO_MODER_MODER0 |
+                      GPIO_MODER_MODER1 |
+                      GPIO_MODER_MODER2 |
+                      GPIO_MODER_MODER3 |
+                      GPIO_MODER_MODER4);
+
+    // Enable APB Bus clock to TIM2
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+
+    // Counting direction up
+    TIM2->CR1 &= ~TIM_CR1_DIR;
+
+    // Set the timer prescaler
+    TIM2->PSC = 480 - 1;
+
+    // Set the ARR
+    TIM2->ARR = 100 - 1;
+
+    // Enable the Timer Update Interrupt
+    TIM2->DIER |= TIM_DIER_UIE;
+
+    // Start the timer!
+    TIM2->CR1 |= TIM_CR1_CEN;
+
+    // Enable the Interrupt in the NVIC
+    NVIC->ISER[0] |= 1 << TIM2_IRQn;
+}
+
+// THIS IS ABSOLUTLY NECESSARY FOR ANY INTERRUPT HANDLER IN C++ CODE!!!
+extern "C" {
+
+void TIM2_IRQHandler() {
+    // Acknowledge the interrupt
+    TIM2->SR &= ~TIM_SR_UIF;
+
+    // Sample only the relevant IDR values
+    int IDR = GPIOB->IDR & 0x1F;
+
+    // iterate over the IDR inputs
+    for (int i = 0; i < 5; i++) {
+        // Update the button history samples
+        buttonHistory[i] <<= 1;
+        buttonHistory[i] |= 0x1 & (IDR >> i);
+
+        // Check if the most recent four samples are 1, AND the oldest four samples are 0
+        if (((buttonHistory[i] & 0x000F) == 0x000F) && ((buttonHistory[i] & 0xF000) == 0)) {
+            // Give us some hysteresis
+            buttonHistory[i] = 0xFFFF;
+
+            // Call the appropriate function
+            switch (i) {
+            case 0:
+                tetrisPTR->upButtonPress();
+                break;
+            case 1:
+                tetrisPTR->leftButtonPress();
+                break;
+            case 2:
+                tetrisPTR->downButtonPress();
+                break;
+            case 3:
+                tetrisPTR->rightButtonPress();
+                break;
+            case 4:
+                tetrisPTR->rotateButtonPress();
+                break;
+            }
+        }
+    }
+}
 }
 
 int main(void) {
@@ -91,9 +178,16 @@ int main(void) {
 
     // Start the test!
     Display tetris = Display();
+    tetrisPTR = &tetris;
+
+    // Start the button code
+    init_TIM2_buttons();
 
     // Do some testing using only button presses and Public API calls
     int test_speed = 1000;
+
+    for(;;);
+
     while(1) {
         delay(test_speed);
         tetris.upButtonPress();
@@ -113,6 +207,7 @@ int main(void) {
         delay(test_speed);
         tetris.drawScore(56);
         tetris.drawNextBlock(Z_BLOCK);
+        tetris.drawGameBoard(board);
         delay(test_speed);
         delay(test_speed);
         tetris.endGame(123); // End Game event takes us to NAME_ENTRY state
